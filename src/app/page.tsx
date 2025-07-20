@@ -6,8 +6,10 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { testAPI } from "@/lib/api-test";
+import { getPokemonPage } from "@/lib/api-test";
 import { PokemonCard } from "@/components/pokemon/PokemonCard";
+import Pagination from "@/components/ui/Pagination";
+import usePagination from "@/hooks/usePagination";
 import { theme } from "@/styles/theme";
 
 interface PokemonData {
@@ -77,23 +79,24 @@ const PokemonGrid = styled.div`
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       retry: 2,
     },
   },
 });
 
-function PokemonApp() {
+const PokemonApp = () => {
+  const pagination = usePagination(151, 20);
+
   const {
-    data: pokemon,
+    data: pokemonData,
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: ["pokemon-demo"],
-    queryFn: testAPI,
+    queryKey: ["pokemon-page", pagination.currentPage],
+    queryFn: () => getPokemonPage(pagination.currentPage, 20),
   });
-
   return (
     <Container>
       <Header>
@@ -109,33 +112,44 @@ function PokemonApp() {
         </ErrorText>
       )}
 
-      {pokemon && (
-        <PokemonGrid>
-          {pokemon.map((poke: PokemonData) => (
-            <PokemonCard
-              key={poke.id}
-              pokemon={{
-                ...poke,
-                height: poke.height || 0,
-                weight: poke.weight || 0,
-                pokemontypes: poke.pokemontypes
-                  .filter((pt) => pt.type)
-                  .map((pt) => ({
-                    type: { name: pt.type!.name },
+      {pokemonData && (
+        <>
+          <PokemonGrid style={{ opacity: 1 }}>
+            {pokemonData.pokemon.map((poke: PokemonData) => (
+              <PokemonCard
+                key={poke.id}
+                pokemon={{
+                  ...poke,
+                  height: poke.height || 0,
+                  weight: poke.weight || 0,
+                  pokemontypes: poke.pokemontypes.map((pt) => ({
+                    type: { name: pt.type?.name || "" },
                   })),
-              }}
-            />
-          ))}
-        </PokemonGrid>
+                }}
+              />
+            ))}
+          </PokemonGrid>
+
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={pagination.goToPage}
+            canGoNext={pagination.canGoNext}
+            canGoPrev={pagination.canGoPrev}
+            getPageNumbers={pagination.getPageNumbers}
+          />
+        </>
       )}
     </Container>
   );
-}
+};
 
-export default function Home() {
+const Home = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <PokemonApp />
     </QueryClientProvider>
   );
-}
+};
+
+export default Home;
