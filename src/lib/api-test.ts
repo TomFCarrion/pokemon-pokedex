@@ -6,6 +6,8 @@ import {
   type GetPokemonListQuery,
   type SearchPokemonByNameQuery,
   type SearchPokemonByIdQuery,
+  type Pokemon_Order_By,
+  Order_By,
 } from "./generated/graphql";
 
 export const testAPI = async () => {
@@ -17,12 +19,17 @@ export const testAPI = async () => {
   return data.pokemon;
 };
 
-export const getPokemonPage = async (page: number, limit: number = 20) => {
+export const getPokemonPage = async (
+  page: number,
+  limit: number = 20,
+  orderBy: Pokemon_Order_By[] = [{ id: Order_By.Asc }]
+) => {
   const offset = (page - 1) * limit;
 
   const data = (await graphqlClient.request(GetPokemonListDocument, {
     limit,
     offset,
+    orderBy,
   })) as GetPokemonListQuery;
 
   return {
@@ -32,7 +39,10 @@ export const getPokemonPage = async (page: number, limit: number = 20) => {
   };
 };
 
-export const searchPokemon = async (searchTerm: string) => {
+export const searchPokemon = async (
+  searchTerm: string,
+  orderBy: Pokemon_Order_By[] = [{ id: Order_By.Asc }]
+) => {
   if (!searchTerm.trim()) {
     return { pokemon: [], totalItems: 0 };
   }
@@ -44,6 +54,7 @@ export const searchPokemon = async (searchTerm: string) => {
 
     const data = (await graphqlClient.request(SearchPokemonByIdDocument, {
       pokemonId: pokemonId,
+      orderBy,
     })) as SearchPokemonByIdQuery;
 
     return {
@@ -55,6 +66,7 @@ export const searchPokemon = async (searchTerm: string) => {
 
     const data = (await graphqlClient.request(SearchPokemonByNameDocument, {
       namePattern: namePattern,
+      orderBy,
     })) as SearchPokemonByNameQuery;
 
     return {

@@ -11,8 +11,10 @@ import { PokemonCard } from "@/components/pokemon/PokemonCard";
 import Pagination from "@/components/ui/Pagination";
 import usePagination from "@/hooks/usePagination";
 import SearchBar from "@/components/ui/SearchBar";
+import useSortPersistence, { SortField } from "@/hooks/useSortPersistence";
 import { theme } from "@/styles/theme";
 import { useCallback, useState } from "react";
+import { SortControls } from "@/components/ui/SortControls";
 
 interface PokemonData {
   id: number;
@@ -82,7 +84,15 @@ const SearchResults = styled.div`
   text-align: center;
   margin-bottom: ${theme.spacing.lg};
   color: ${theme.colors.textLight};
+  width: 100%;
   font-size: 0.9rem;
+`;
+
+const ControlsContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${theme.spacing.lg};
 `;
 
 const NoResults = styled.div`
@@ -105,6 +115,9 @@ const PokemonApp = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const pagination = usePagination(151, 20);
 
+  const { sortField, sortOrder, toggleSort, getGraphQLOrderBy } =
+    useSortPersistence();
+
   const handleSearch = useCallback(
     (term: string) => {
       setSearchTerm(term);
@@ -115,15 +128,23 @@ const PokemonApp = () => {
     [searchTerm, pagination]
   );
 
+  const handleSort = useCallback(
+    (field: SortField) => {
+      toggleSort(field);
+      pagination.goToPage(1); // Reset to page 1 when sorting changes
+    },
+    [toggleSort, pagination]
+  );
   const searchQuery = useQuery({
-    queryKey: ["pokemon-search", searchTerm],
-    queryFn: () => searchPokemon(searchTerm),
+    queryKey: ["pokemon-search", searchTerm, sortField, sortOrder],
+    queryFn: () => searchPokemon(searchTerm, getGraphQLOrderBy()),
     enabled: !!searchTerm.trim(),
   });
 
   const paginationQuery = useQuery({
-    queryKey: ["pokemon-page", pagination.currentPage],
-    queryFn: () => getPokemonPage(pagination.currentPage, 20),
+    queryKey: ["pokemon-page", pagination.currentPage, sortField, sortOrder],
+    queryFn: () =>
+      getPokemonPage(pagination.currentPage, 20, getGraphQLOrderBy()),
     enabled: !searchTerm.trim(),
   });
 
@@ -137,11 +158,18 @@ const PokemonApp = () => {
         <Title>🔍 Pokédex</Title>
       </Header>
 
-      <SearchBar
-        onSearch={handleSearch}
-        placeholder="Search by name or number..."
-        isLoading={isLoading}
-      />
+      <ControlsContainer>
+        <SearchBar
+          onSearch={handleSearch}
+          placeholder="Search by name or number..."
+          isLoading={isLoading}
+        />
+        <SortControls
+          sortField={sortField}
+          sortOrder={sortOrder}
+          onSort={handleSort}
+        />
+      </ControlsContainer>
 
       {isSearching && pokemonData && (
         <SearchResults>

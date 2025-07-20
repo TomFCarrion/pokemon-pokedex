@@ -57,7 +57,7 @@ const Header = styled.div`
 
 const Name = styled.h3`
   margin: 0;
-  color: ${theme.colors.text};
+  color: white;
   text-transform: capitalize;
   font-size: 1.1rem;
   font-weight: 600;

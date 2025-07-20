@@ -1,9 +1,13 @@
-query GetPokemonList($limit: Int!, $offset: Int!) {
+query GetPokemonList(
+  $limit: Int!
+  $offset: Int!
+  $orderBy: [pokemon_order_by!]!
+) {
   pokemon(
     limit: $limit
     offset: $offset
     where: { id: { _lte: 151 } }
-    order_by: { id: asc }
+    order_by: $orderBy
   ) {
     id
     name
@@ -17,10 +21,14 @@ query GetPokemonList($limit: Int!, $offset: Int!) {
   }
 }
 
-query SearchPokemonByName($namePattern: String!) {
+# Enhanced search queries with sorting
+query SearchPokemonByName(
+  $namePattern: String!
+  $orderBy: [pokemon_order_by!]!
+) {
   pokemon(
     where: { _and: [{ id: { _lte: 151 } }, { name: { _ilike: $namePattern } }] }
-    order_by: { id: asc }
+    order_by: $orderBy
   ) {
     id
     name
@@ -34,10 +42,10 @@ query SearchPokemonByName($namePattern: String!) {
   }
 }
 
-query SearchPokemonById($pokemonId: Int!) {
+query SearchPokemonById($pokemonId: Int!, $orderBy: [pokemon_order_by!]!) {
   pokemon(
     where: { _and: [{ id: { _lte: 151 } }, { id: { _eq: $pokemonId } }] }
-    order_by: { id: asc }
+    order_by: $orderBy
   ) {
     id
     name

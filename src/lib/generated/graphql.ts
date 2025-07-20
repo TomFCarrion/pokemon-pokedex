@@ -49397,6 +49397,7 @@ export type Versionname_Variance_Order_By = {
 export type GetPokemonListQueryVariables = Exact<{
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
+  orderBy: Array<Pokemon_Order_By> | Pokemon_Order_By;
 }>;
 
 
@@ -49404,6 +49405,7 @@ export type GetPokemonListQuery = { __typename?: 'query_root', pokemon: Array<{ 
 
 export type SearchPokemonByNameQueryVariables = Exact<{
   namePattern: Scalars['String']['input'];
+  orderBy: Array<Pokemon_Order_By> | Pokemon_Order_By;
 }>;
 
 
@@ -49411,6 +49413,7 @@ export type SearchPokemonByNameQuery = { __typename?: 'query_root', pokemon: Arr
 
 export type SearchPokemonByIdQueryVariables = Exact<{
   pokemonId: Scalars['Int']['input'];
+  orderBy: Array<Pokemon_Order_By> | Pokemon_Order_By;
 }>;
 
 
@@ -49418,12 +49421,12 @@ export type SearchPokemonByIdQuery = { __typename?: 'query_root', pokemon: Array
 
 
 export const GetPokemonListDocument = gql`
-    query GetPokemonList($limit: Int!, $offset: Int!) {
+    query GetPokemonList($limit: Int!, $offset: Int!, $orderBy: [pokemon_order_by!]!) {
   pokemon(
     limit: $limit
     offset: $offset
     where: {id: {_lte: 151}}
-    order_by: {id: asc}
+    order_by: $orderBy
   ) {
     id
     name
@@ -49438,10 +49441,10 @@ export const GetPokemonListDocument = gql`
 }
     `;
 export const SearchPokemonByNameDocument = gql`
-    query SearchPokemonByName($namePattern: String!) {
+    query SearchPokemonByName($namePattern: String!, $orderBy: [pokemon_order_by!]!) {
   pokemon(
     where: {_and: [{id: {_lte: 151}}, {name: {_ilike: $namePattern}}]}
-    order_by: {id: asc}
+    order_by: $orderBy
   ) {
     id
     name
@@ -49456,10 +49459,10 @@ export const SearchPokemonByNameDocument = gql`
 }
     `;
 export const SearchPokemonByIdDocument = gql`
-    query SearchPokemonById($pokemonId: Int!) {
+    query SearchPokemonById($pokemonId: Int!, $orderBy: [pokemon_order_by!]!) {
   pokemon(
     where: {_and: [{id: {_lte: 151}}, {id: {_eq: $pokemonId}}]}
-    order_by: {id: asc}
+    order_by: $orderBy
   ) {
     id
     name

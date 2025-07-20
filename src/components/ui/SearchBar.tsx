@@ -12,8 +12,7 @@ interface SearchBarProps {
 
 const SearchContainer = styled.div`
   position: relative;
-  max-width: 400px;
-  margin: 0 auto ${theme.spacing.xl} auto;
+  width: 80%;
 `;
 
 const SearchInput = styled.input`
