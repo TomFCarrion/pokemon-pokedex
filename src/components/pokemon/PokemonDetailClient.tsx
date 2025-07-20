@@ -15,11 +15,23 @@ interface Props {
 }
 
 const Container = styled.main`
+  position: relative;
   max-width: 800px;
   margin: 0 auto;
   padding: ${theme.spacing.xl};
-  background: ${theme.colors.background};
   min-height: 100vh;
+
+  /* Full viewport background using pseudo-element */
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: ${theme.colors.background};
+    z-index: -1;
+  }
 
   @media (min-width: 1024px) {
     max-width: 100%;
@@ -291,14 +303,6 @@ const ErrorState = styled.div`
 
 export default function PokemonDetailClient({ pokemonId }: Props) {
   const router = useRouter();
-
-  // Set body background to match container
-  React.useEffect(() => {
-    document.body.style.background = "#f8f9fa"; // theme.colors.background equivalent
-    return () => {
-      document.body.style.background = "";
-    };
-  }, []);
 
   const {
     data: pokemon,

@@ -19,7 +19,7 @@ interface PokemonCardProps {
   pokemon: Pokemon;
 }
 
-const PokeballIcon = () => (
+export const PokeballIcon = () => (
   <svg
     width="80"
     height="80"

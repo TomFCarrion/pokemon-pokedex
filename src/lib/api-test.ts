@@ -89,11 +89,7 @@ export const getPokemonDetail = async (id: number) => {
 
   let sprites = null;
   if (pokemon.pokemonsprites?.[0]?.sprites) {
-    try {
-      sprites = JSON.parse(pokemon.pokemonsprites[0].sprites);
-    } catch (error) {
-      console.warn("Failed to parse sprites JSON:", error);
-    }
+    sprites = pokemon.pokemonsprites[0].sprites;
   }
 
   return {

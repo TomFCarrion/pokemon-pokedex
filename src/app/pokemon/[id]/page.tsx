@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import {
   QueryClient,
   dehydrate,
@@ -9,11 +8,12 @@ import PokemonDetailClient from "@/components/pokemon/PokemonDetailClient";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function PokemonDetailPage({ params }: Props) {
-  const pokemonId = parseInt(params.id);
+  const { id } = await params;
+  const pokemonId = parseInt(id);
 
   if (isNaN(pokemonId) || pokemonId < 1 || pokemonId > 151) {
     notFound();
@@ -46,7 +46,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props) {
-  const pokemonId = parseInt(params.id);
+  const { id } = await params;
+  const pokemonId = parseInt(id);
 
   if (isNaN(pokemonId) || pokemonId < 1 || pokemonId > 151) {
     return {

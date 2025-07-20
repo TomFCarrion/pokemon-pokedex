@@ -6,11 +6,11 @@ import { getPokemonPage, searchPokemon } from "@/lib/api-test";
 import { PokemonCard } from "@/components/pokemon/PokemonCard";
 import Pagination from "@/components/ui/Pagination";
 import usePagination from "@/hooks/usePagination";
-import SearchBar from "@/components/ui/SearchBar";
+import SearchAndSort from "@/components/ui/SearchBar";
 import useSortPersistence, { SortField } from "@/hooks/useSortPersistence";
 import { theme } from "@/styles/theme";
 import { useCallback, useState } from "react";
-import { SortControls } from "@/components/ui/SortControls";
+import { PokeballIcon } from "@/components/pokemon/PokemonCard";
 
 interface PokemonData {
   id: number;
@@ -23,31 +23,108 @@ interface PokemonData {
 }
 
 const Container = styled.main`
+  position: relative;
   width: 100%;
+  height: 100vh;
   background: ${theme.colors.background};
-  min-height: 100vh;
-  padding: 0 ${theme.spacing.lg};
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
 
-  @media (min-width: 1440px) {
-    padding: 0 calc((100vw - 1440px) / 2 + ${theme.spacing.lg});
-  }
+const PokeballBackground = styled.div`
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  color: black;
+  opacity: 0.05;
+  transform: scale(10);
+  z-index: 0;
+  pointer-events: none;
 `;
 
 const Header = styled.header`
+  position: relative;
+  z-index: 10;
   text-align: center;
-  margin-bottom: ${theme.spacing["2xl"]};
+  padding: ${theme.spacing.lg} ${theme.spacing.lg} 0;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    padding: ${theme.spacing.md} ${theme.spacing.md} 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: ${theme.spacing.sm} ${theme.spacing.sm} 0;
+  }
 `;
 
 const Title = styled.h1`
-  font-size: 3rem;
+  font-size: 2.5rem;
   color: ${theme.colors.text};
-  margin: 0 0 ${theme.spacing.md} 0;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: ${theme.spacing.md};
+    font-size: 1.5rem;
+  }
 `;
 
-const Subtitle = styled.p`
-  color: ${theme.colors.textLight};
-  font-size: 1.1rem;
-  margin: 0 0 ${theme.spacing.xl} 0;
+const ControlsContainer = styled.div`
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding: ${theme.spacing.lg};
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    padding: ${theme.spacing.md};
+  }
+
+  @media (max-width: 480px) {
+    padding: ${theme.spacing.sm};
+  }
+`;
+
+const ContentArea = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 ${theme.spacing.lg};
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    padding: 0 ${theme.spacing.md};
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 ${theme.spacing.sm};
+  }
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${theme.colors.background};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${theme.colors.border};
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${theme.colors.textLight};
+  }
 `;
 
 const LoadingText = styled.div`
@@ -69,6 +146,7 @@ const PokemonGrid = styled.div`
   grid-template-columns: repeat(auto-fill, 210px);
   gap: ${theme.spacing.lg};
   justify-content: center;
+  padding-bottom: ${theme.spacing.xl};
 
   @media (max-width: ${theme.breakpoints.mobile}) {
     grid-template-columns: repeat(auto-fill, 40vw);
@@ -82,13 +160,7 @@ const SearchResults = styled.div`
   color: ${theme.colors.textLight};
   width: 100%;
   font-size: 0.9rem;
-`;
-
-const ControlsContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${theme.spacing.lg};
+  padding-top: ${theme.spacing.md};
 `;
 
 const NoResults = styled.div`
@@ -142,50 +214,57 @@ const Pokedex = () => {
 
   return (
     <Container>
+      <PokeballBackground>
+        <PokeballIcon />
+      </PokeballBackground>
+
       <Header>
-        <Title>🔍 Pokédex</Title>
+        <Title>Pokédex</Title>
       </Header>
 
       <ControlsContainer>
-        <SearchBar
+        <SearchAndSort
           onSearch={handleSearch}
+          onSort={handleSort}
           placeholder="Search by name or number..."
           isLoading={isLoading}
-        />
-        <SortControls
           sortField={sortField}
           sortOrder={sortOrder}
-          onSort={handleSort}
         />
       </ControlsContainer>
 
-      {isSearching && pokemonData && (
-        <SearchResults>
-          {pokemonData.totalItems === 0
-            ? `No results for "${searchTerm}"`
-            : `Found ${pokemonData.totalItems} Pokémon matching "${searchTerm}"`}
-        </SearchResults>
-      )}
+      <ContentArea>
+        {isSearching && pokemonData && (
+          <SearchResults>
+            {pokemonData.totalItems === 0
+              ? `No results for "${searchTerm}"`
+              : `Found ${pokemonData.totalItems} Pokémon matching "${searchTerm}"`}
+          </SearchResults>
+        )}
 
-      {pokemonData && pokemonData.pokemon.length === 0 && !isLoading && (
-        <NoResults>
-          {isSearching
-            ? `No Pokémon found matching "${searchTerm}". Try searching for "pikachu" or "25"!`
-            : "No Pokémon found."}
-        </NoResults>
-      )}
+        {pokemonData && pokemonData.pokemon.length === 0 && !isLoading && (
+          <NoResults>
+            {isSearching
+              ? `No Pokémon found matching "${searchTerm}". Try searching for "pikachu" or "25"!`
+              : "No Pokémon found."}
+          </NoResults>
+        )}
 
-      {isLoading && <LoadingText>Loading Pokémon...</LoadingText>}
+        {isLoading && <LoadingText>Loading Pokémon...</LoadingText>}
 
-      {isError && (
-        <ErrorText>
-          Failed to load Pokémon: {error?.message || "Unknown error"}
-        </ErrorText>
-      )}
+        {isError && (
+          <ErrorText>
+            Failed to load Pokémon: {error?.message || "Unknown error"}
+          </ErrorText>
+        )}
 
-      {pokemonData && (
-        <>
-          <PokemonGrid style={{ opacity: 1 }}>
+        {pokemonData && (
+          <PokemonGrid
+            style={{
+              opacity: isLoading ? 0.6 : 1,
+              transition: "opacity 0.2s ease-in-out",
+            }}
+          >
             {pokemonData.pokemon.map((poke: PokemonData) => (
               <PokemonCard
                 key={poke.id}
@@ -200,18 +279,19 @@ const Pokedex = () => {
               />
             ))}
           </PokemonGrid>
+        )}
+      </ContentArea>
 
-          {!isSearching && (
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              onPageChange={pagination.goToPage}
-              canGoNext={pagination.canGoNext}
-              canGoPrev={pagination.canGoPrev}
-              getPageNumbers={pagination.getPageNumbers}
-            />
-          )}
-        </>
+      {!isSearching && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={pagination.goToPage}
+          canGoNext={pagination.canGoNext}
+          canGoPrev={pagination.canGoPrev}
+          getPageNumbers={pagination.getPageNumbers}
+          isLoading={isLoading}
+        />
       )}
     </Container>
   );
