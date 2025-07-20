@@ -1,0 +1,50 @@
+export const theme = {
+  colors: {
+    primary: "#3B82F6",
+    background: "#F8FAFC",
+    card: "#FFFFFF",
+    text: "#1F2937",
+    textLight: "#6B7280",
+    border: "#E5E7EB",
+    types: {
+      normal: "#A8A878",
+      fire: "#FC6C6D",
+      water: "#6890F0",
+      electric: "#F8D030",
+      grass: "#4AD0B0",
+      ice: "#98D8D8",
+      fighting: "#C03028",
+      poison: "#A040A0",
+      ground: "#E0C068",
+      flying: "#A890F0",
+      psychic: "#F85888",
+      bug: "#A8B820",
+      rock: "#B8A038",
+      ghost: "#705898",
+      dragon: "#7038F8",
+      dark: "#705848",
+      steel: "#B8B8D0",
+      fairy: "#EE99AC",
+    },
+  },
+  breakpoints: {
+    mobile: "768px",
+    tablet: "1024px",
+  },
+  spacing: {
+    xs: "0.25rem",
+    sm: "0.5rem",
+    md: "1rem",
+    lg: "1.5rem",
+    xl: "2rem",
+    "2xl": "3rem",
+  },
+  borderRadius: {
+    sm: "0.375rem",
+    md: "0.5rem",
+    lg: "0.75rem",
+    xl: "1rem",
+  },
+};
+
+export type Theme = typeof theme;
