@@ -49402,6 +49402,20 @@ export type GetPokemonListQueryVariables = Exact<{
 
 export type GetPokemonListQuery = { __typename?: 'query_root', pokemon: Array<{ __typename?: 'pokemon', id: number, name: string, height?: number | null, weight?: number | null, pokemontypes: Array<{ __typename?: 'pokemontype', type?: { __typename?: 'type', name: string } | null }> }> };
 
+export type SearchPokemonByNameQueryVariables = Exact<{
+  namePattern: Scalars['String']['input'];
+}>;
+
+
+export type SearchPokemonByNameQuery = { __typename?: 'query_root', pokemon: Array<{ __typename?: 'pokemon', id: number, name: string, height?: number | null, weight?: number | null, pokemontypes: Array<{ __typename?: 'pokemontype', type?: { __typename?: 'type', name: string } | null }> }> };
+
+export type SearchPokemonByIdQueryVariables = Exact<{
+  pokemonId: Scalars['Int']['input'];
+}>;
+
+
+export type SearchPokemonByIdQuery = { __typename?: 'query_root', pokemon: Array<{ __typename?: 'pokemon', id: number, name: string, height?: number | null, weight?: number | null, pokemontypes: Array<{ __typename?: 'pokemontype', type?: { __typename?: 'type', name: string } | null }> }> };
+
 
 export const GetPokemonListDocument = gql`
     query GetPokemonList($limit: Int!, $offset: Int!) {
@@ -49409,6 +49423,42 @@ export const GetPokemonListDocument = gql`
     limit: $limit
     offset: $offset
     where: {id: {_lte: 151}}
+    order_by: {id: asc}
+  ) {
+    id
+    name
+    height
+    weight
+    pokemontypes {
+      type {
+        name
+      }
+    }
+  }
+}
+    `;
+export const SearchPokemonByNameDocument = gql`
+    query SearchPokemonByName($namePattern: String!) {
+  pokemon(
+    where: {_and: [{id: {_lte: 151}}, {name: {_ilike: $namePattern}}]}
+    order_by: {id: asc}
+  ) {
+    id
+    name
+    height
+    weight
+    pokemontypes {
+      type {
+        name
+      }
+    }
+  }
+}
+    `;
+export const SearchPokemonByIdDocument = gql`
+    query SearchPokemonById($pokemonId: Int!) {
+  pokemon(
+    where: {_and: [{id: {_lte: 151}}, {id: {_eq: $pokemonId}}]}
     order_by: {id: asc}
   ) {
     id
@@ -49433,6 +49483,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     GetPokemonList(variables: GetPokemonListQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPokemonListQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetPokemonListQuery>({ document: GetPokemonListDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPokemonList', 'query', variables);
+    },
+    SearchPokemonByName(variables: SearchPokemonByNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SearchPokemonByNameQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchPokemonByNameQuery>({ document: SearchPokemonByNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SearchPokemonByName', 'query', variables);
+    },
+    SearchPokemonById(variables: SearchPokemonByIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SearchPokemonByIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchPokemonByIdQuery>({ document: SearchPokemonByIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SearchPokemonById', 'query', variables);
     }
   };
 }

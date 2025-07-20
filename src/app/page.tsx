@@ -6,11 +6,13 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { getPokemonPage } from "@/lib/api-test";
+import { getPokemonPage, searchPokemon } from "@/lib/api-test";
 import { PokemonCard } from "@/components/pokemon/PokemonCard";
 import Pagination from "@/components/ui/Pagination";
 import usePagination from "@/hooks/usePagination";
+import SearchBar from "@/components/ui/SearchBar";
 import { theme } from "@/styles/theme";
+import { useCallback, useState } from "react";
 
 interface PokemonData {
   id: number;
@@ -76,6 +78,20 @@ const PokemonGrid = styled.div`
   }
 `;
 
+const SearchResults = styled.div`
+  text-align: center;
+  margin-bottom: ${theme.spacing.lg};
+  color: ${theme.colors.textLight};
+  font-size: 0.9rem;
+`;
+
+const NoResults = styled.div`
+  text-align: center;
+  padding: ${theme.spacing["2xl"]};
+  color: ${theme.colors.textLight};
+  font-size: 1.1rem;
+`;
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -86,23 +102,62 @@ const queryClient = new QueryClient({
 });
 
 const PokemonApp = () => {
+  const [searchTerm, setSearchTerm] = useState("");
   const pagination = usePagination(151, 20);
 
-  const {
-    data: pokemonData,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const handleSearch = useCallback(
+    (term: string) => {
+      setSearchTerm(term);
+      if (term !== searchTerm) {
+        pagination.goToPage(1);
+      }
+    },
+    [searchTerm, pagination]
+  );
+
+  const searchQuery = useQuery({
+    queryKey: ["pokemon-search", searchTerm],
+    queryFn: () => searchPokemon(searchTerm),
+    enabled: !!searchTerm.trim(),
+  });
+
+  const paginationQuery = useQuery({
     queryKey: ["pokemon-page", pagination.currentPage],
     queryFn: () => getPokemonPage(pagination.currentPage, 20),
+    enabled: !searchTerm.trim(),
   });
+
+  const isSearching = !!searchTerm.trim();
+  const activeQuery = isSearching ? searchQuery : paginationQuery;
+  const { data: pokemonData, isLoading, isError, error } = activeQuery;
+
   return (
     <Container>
       <Header>
         <Title>🔍 Pokédex</Title>
-        <Subtitle>Discover the world of Pokémon</Subtitle>
       </Header>
+
+      <SearchBar
+        onSearch={handleSearch}
+        placeholder="Search by name or number..."
+        isLoading={isLoading}
+      />
+
+      {isSearching && pokemonData && (
+        <SearchResults>
+          {pokemonData.totalItems === 0
+            ? `No results for "${searchTerm}"`
+            : `Found ${pokemonData.totalItems} Pokémon matching "${searchTerm}"`}
+        </SearchResults>
+      )}
+
+      {pokemonData && pokemonData.pokemon.length === 0 && !isLoading && (
+        <NoResults>
+          {isSearching
+            ? `No Pokémon found matching "${searchTerm}". Try searching for "pikachu" or "25"!`
+            : "No Pokémon found."}
+        </NoResults>
+      )}
 
       {isLoading && <LoadingText>Loading Pokémon...</LoadingText>}
 
@@ -130,14 +185,16 @@ const PokemonApp = () => {
             ))}
           </PokemonGrid>
 
-          <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={pagination.goToPage}
-            canGoNext={pagination.canGoNext}
-            canGoPrev={pagination.canGoPrev}
-            getPageNumbers={pagination.getPageNumbers}
-          />
+          {!isSearching && (
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={pagination.goToPage}
+              canGoNext={pagination.canGoNext}
+              canGoPrev={pagination.canGoPrev}
+              getPageNumbers={pagination.getPageNumbers}
+            />
+          )}
         </>
       )}
     </Container>

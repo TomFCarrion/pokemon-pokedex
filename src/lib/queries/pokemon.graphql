@@ -16,3 +16,37 @@ query GetPokemonList($limit: Int!, $offset: Int!) {
     }
   }
 }
+
+query SearchPokemonByName($namePattern: String!) {
+  pokemon(
+    where: { _and: [{ id: { _lte: 151 } }, { name: { _ilike: $namePattern } }] }
+    order_by: { id: asc }
+  ) {
+    id
+    name
+    height
+    weight
+    pokemontypes {
+      type {
+        name
+      }
+    }
+  }
+}
+
+query SearchPokemonById($pokemonId: Int!) {
+  pokemon(
+    where: { _and: [{ id: { _lte: 151 } }, { id: { _eq: $pokemonId } }] }
+    order_by: { id: asc }
+  ) {
+    id
+    name
+    height
+    weight
+    pokemontypes {
+      type {
+        name
+      }
+    }
+  }
+}

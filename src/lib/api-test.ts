@@ -1,7 +1,11 @@
 import { graphqlClient } from "./graphql-client";
 import {
   GetPokemonListDocument,
+  SearchPokemonByNameDocument,
+  SearchPokemonByIdDocument,
   type GetPokemonListQuery,
+  type SearchPokemonByNameQuery,
+  type SearchPokemonByIdQuery,
 } from "./generated/graphql";
 
 export const testAPI = async () => {
@@ -26,4 +30,36 @@ export const getPokemonPage = async (page: number, limit: number = 20) => {
     hasMore: data.pokemon.length === limit,
     totalItems: 151,
   };
+};
+
+export const searchPokemon = async (searchTerm: string) => {
+  if (!searchTerm.trim()) {
+    return { pokemon: [], totalItems: 0 };
+  }
+
+  const term = searchTerm.trim();
+
+  if (!isNaN(Number(term))) {
+    const pokemonId = parseInt(term);
+
+    const data = (await graphqlClient.request(SearchPokemonByIdDocument, {
+      pokemonId: pokemonId,
+    })) as SearchPokemonByIdQuery;
+
+    return {
+      pokemon: data.pokemon,
+      totalItems: data.pokemon.length,
+    };
+  } else {
+    const namePattern = `%${term.toLowerCase()}%`;
+
+    const data = (await graphqlClient.request(SearchPokemonByNameDocument, {
+      namePattern: namePattern,
+    })) as SearchPokemonByNameQuery;
+
+    return {
+      pokemon: data.pokemon,
+      totalItems: data.pokemon.length,
+    };
+  }
 };
