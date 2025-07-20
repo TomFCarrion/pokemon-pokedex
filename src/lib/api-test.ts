@@ -3,11 +3,13 @@ import {
   GetPokemonListDocument,
   SearchPokemonByNameDocument,
   SearchPokemonByIdDocument,
+  GetPokemonDetailDocument,
   type GetPokemonListQuery,
   type SearchPokemonByNameQuery,
   type SearchPokemonByIdQuery,
   type Pokemon_Order_By,
   Order_By,
+  type GetPokemonDetailQuery,
 } from "./generated/graphql";
 
 export const testAPI = async () => {
@@ -74,4 +76,35 @@ export const searchPokemon = async (
       totalItems: data.pokemon.length,
     };
   }
+};
+
+export const getPokemonDetail = async (id: number) => {
+  const data = await graphqlClient.request(GetPokemonDetailDocument, { id });
+
+  const pokemon = (data as GetPokemonDetailQuery).pokemon[0];
+
+  if (!pokemon) {
+    throw new Error(`Pokemon with ID ${id} not found`);
+  }
+
+  let sprites = null;
+  if (pokemon.pokemonsprites?.[0]?.sprites) {
+    try {
+      sprites = JSON.parse(pokemon.pokemonsprites[0].sprites);
+    } catch (error) {
+      console.warn("Failed to parse sprites JSON:", error);
+    }
+  }
+
+  return {
+    ...pokemon,
+    sprites: sprites || {
+      front_default: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+      other: {
+        "official-artwork": {
+          front_default: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+        },
+      },
+    },
+  };
 };

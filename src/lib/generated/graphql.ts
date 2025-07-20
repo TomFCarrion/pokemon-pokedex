@@ -49419,6 +49419,13 @@ export type SearchPokemonByIdQueryVariables = Exact<{
 
 export type SearchPokemonByIdQuery = { __typename?: 'query_root', pokemon: Array<{ __typename?: 'pokemon', id: number, name: string, height?: number | null, weight?: number | null, pokemontypes: Array<{ __typename?: 'pokemontype', type?: { __typename?: 'type', name: string } | null }> }> };
 
+export type GetPokemonDetailQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type GetPokemonDetailQuery = { __typename?: 'query_root', pokemon: Array<{ __typename?: 'pokemon', id: number, name: string, height?: number | null, weight?: number | null, base_experience?: number | null, pokemontypes: Array<{ __typename?: 'pokemontype', slot: number, type?: { __typename?: 'type', name: string } | null }>, pokemonsprites: Array<{ __typename?: 'pokemonsprites', sprites: any }>, pokemonstats: Array<{ __typename?: 'pokemonstat', base_stat: number, effort: number, stat?: { __typename?: 'stat', name: string } | null }>, pokemonabilities: Array<{ __typename?: 'pokemonability', is_hidden: boolean, slot: number, ability?: { __typename?: 'ability', name: string } | null }>, pokemonspecy?: { __typename?: 'pokemonspecies', base_happiness?: number | null, capture_rate?: number | null, pokemonspeciesflavortexts: Array<{ __typename?: 'pokemonspeciesflavortext', flavor_text: string }> } | null }> };
+
 
 export const GetPokemonListDocument = gql`
     query GetPokemonList($limit: Int!, $offset: Int!, $orderBy: [pokemon_order_by!]!) {
@@ -49476,6 +49483,47 @@ export const SearchPokemonByIdDocument = gql`
   }
 }
     `;
+export const GetPokemonDetailDocument = gql`
+    query GetPokemonDetail($id: Int!) {
+  pokemon(where: {id: {_eq: $id}}, limit: 1) {
+    id
+    name
+    height
+    weight
+    base_experience
+    pokemontypes {
+      slot
+      type {
+        name
+      }
+    }
+    pokemonsprites {
+      sprites
+    }
+    pokemonstats {
+      base_stat
+      effort
+      stat {
+        name
+      }
+    }
+    pokemonabilities {
+      is_hidden
+      slot
+      ability {
+        name
+      }
+    }
+    pokemonspecy {
+      base_happiness
+      capture_rate
+      pokemonspeciesflavortexts(where: {language_id: {_eq: 9}}, limit: 1) {
+        flavor_text
+      }
+    }
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -49492,6 +49540,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SearchPokemonById(variables: SearchPokemonByIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SearchPokemonByIdQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<SearchPokemonByIdQuery>({ document: SearchPokemonByIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SearchPokemonById', 'query', variables);
+    },
+    GetPokemonDetail(variables: GetPokemonDetailQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPokemonDetailQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPokemonDetailQuery>({ document: GetPokemonDetailDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPokemonDetail', 'query', variables);
     }
   };
 }

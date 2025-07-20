@@ -21,7 +21,6 @@ query GetPokemonList(
   }
 }
 
-# Enhanced search queries with sorting
 query SearchPokemonByName(
   $namePattern: String!
   $orderBy: [pokemon_order_by!]!
@@ -54,6 +53,47 @@ query SearchPokemonById($pokemonId: Int!, $orderBy: [pokemon_order_by!]!) {
     pokemontypes {
       type {
         name
+      }
+    }
+  }
+}
+
+query GetPokemonDetail($id: Int!) {
+  pokemon(where: { id: { _eq: $id } }, limit: 1) {
+    id
+    name
+    height
+    weight
+    base_experience
+    pokemontypes {
+      slot
+      type {
+        name
+      }
+    }
+    pokemonsprites {
+      sprites
+    }
+    pokemonstats {
+      base_stat
+      effort
+      stat {
+        name
+      }
+    }
+    pokemonabilities {
+      is_hidden
+      slot
+      ability {
+        name
+      }
+    }
+    pokemonspecy {
+      base_happiness
+      capture_rate
+
+      pokemonspeciesflavortexts(where: { language_id: { _eq: 9 } }, limit: 1) {
+        flavor_text
       }
     }
   }
