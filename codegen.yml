@@ -1,0 +1,15 @@
+overwrite: true
+schema: "https://graphql.pokeapi.co/v1beta2"
+documents: "src/**/*.graphql"
+generates:
+  src/lib/generated/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-graphql-request"
+    config:
+      rawRequest: false
+      inlineFragmentTypes: combine
+      skipTypename: false
+      exportFragmentSpreadSubTypes: true
+      dedupeFragments: true

@@ -1,0 +1,18 @@
+query GetPokemonList($limit: Int!, $offset: Int!) {
+  pokemon(
+    limit: $limit
+    offset: $offset
+    where: { id: { _lte: 151 } }
+    order_by: { id: asc }
+  ) {
+    id
+    name
+    height
+    weight
+    pokemontypes {
+      type {
+        name
+      }
+    }
+  }
+}
